@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>modernlit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+<link rel="stylesheet" href="https://cdn.rawgit.com/tonsky/FiraCode/1.205/distr/fira_code.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Anonymous+Pro:400,400i,700,700i">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tufte-css/1.4/tufte.css">
+<link rel="stylesheet" href="data:text/css;base64,LyogVFVGVEUgVEhFTUUgKi8KCmJvZHkgewogIGNvdW50ZXItcmVzZXQ6IGgyIGNvZGU7Cn0KCi8qIEZPUk1BVCBoJSBOT0RFUyAoQ09ERSBCTE9DSyBUSVRMRVMpICovCgovKioKICogMjAyZiBpcyBOQVJST1cgTk8tQlJFQUsgU1BBQ0UuCiAqIDI3ZTggaXMgTUFUSEVNQVRJQ0FMIExFRlQgQU5HTEUgQlJBQ0tFVC4KICogMjdlOSBpcyBNQVRIRU1BVElDQUwgUklHSFQgQU5HTEUgQlJBQ0tFVC4KICogMjI2MyBpcyBTVFJJQ1RMWSBFUVVJVkFMRU5UIFRPLgogKi8KCmg1OjphZnRlciB7CiAgY29udGVudDogIiAiIGF0dHIoZGF0YS1pbmRleCkgIlwyMDJmXDI3ZTlcMjAwOVwyMjYzIjsKICBmb250LXN0eWxlOiBub3JtYWw7Cn0KCmg1W2RhdGEtaW5jcmVtZW50XTphZnRlciB7CiAgY29udGVudDogIiAiIGF0dHIoZGF0YS1pbmRleCkgIlwyMDJmXDI3ZTlcMjAwOStcMjI2MyI7Cn0KCmg1OmJlZm9yZSB7CiAgY29udGVudDogIlwyN2U4XDIwMmYiOwogIGZvbnQtc3R5bGU6IG5vcm1hbDsKfQoKaDUgewogIG1hcmdpbi1ib3R0b206IDZweDsKICBmb250LXN0eWxlOiBpdGFsaWM7CiAgZm9udC1zaXplOiAxLjRyZW07CiAgY291bnRlci1pbmNyZW1lbnQ6IGNvZGU7CiAgZm9udC13ZWlnaHQ6IG5vcm1hbDsKICB0cmFuc2l0aW9uOiAxcyBhbGwgZWFzZS1pbiAxczsKfQoKaDUuaW5jcmVtZW50IHsKICBjb3VudGVyLWluY3JlbWVudDogbm9uZTsKfQoKLyogc3R5bGUgdGhlIGxpbmtzIHdpdGhpbiBjb2RlIGJsb2Nrcy4gVEhlIC5tbC1jb21tZW50LWxpbmsgY2xhc3MgaXMgcGxhY2VkIHRoZXJlIGJ5IHRoZSBgcmVoeXBlLWNvZGUtY29tbWVudGAgbWlkZGxld2FyZS4gKi8KLm1sLWNvbW1lbnQtbGluazo6YWZ0ZXIgewogIGNvbnRlbnQ6ICIgIiBhdHRyKGRhdGEtaW5kZXgpICJcMjAyZlwyN2U5XDIwMDlcMUY1MTciOwpgICBmb250LXN0eWxlOiBub3JtYWw7Cn0KCi5tbC1jb21tZW50LWxpbmsubm8taWNvbjo6YWZ0ZXIgewogIGNvbnRlbnQ6ICIgIiBhdHRyKGRhdGEtaW5kZXgpICJcMjAyZlwyN2U5IjsKYCAgZm9udC1zdHlsZTogbm9ybWFsOwp9CgoubWwtY29tbWVudC1saW5rOmJlZm9yZSB7CiAgY29udGVudDogIlwyN2U4XDIwMmYiOwogIGZvbnQtc3R5bGU6IG5vcm1hbDsKfQoKLm1sLWxvZi1saW5rIHsKICBmb250LXN0eWxlOiBpdGFsaWM7CiAgZm9udC1zaXplOiAxLjJyZW07Cn0KCi5tbC1sb2YtbGluazo6YmVmb3JlIHsKICBjb250ZW50OiAiXDI3ZThcMjAyZiI7CiAgZm9udC1zdHlsZTogbm9ybWFsOwp9CgoubWwtbG9mLWxpbms6OmFmdGVyIHsKICBjb250ZW50OiAiICIgYXR0cihkYXRhLWluZGV4KSAiXDIwMmZcMjdlOSI7CiAgZm9udC1zdHlsZTogbm9ybWFsOwp9CgoubWwtY29tbWVudC1saW5rIHsKICBjb2xvcjogIzExMTExMTsKICBjb3VudGVyLWluY3JlbWVudDogY29kZTsKICBjdXJzb3I6IHBvaW50ZXI7CiAgZm9udC1mYW1pbHk6ICdUaW1lcyBOZXcgUm9tYW4nOwogIGZvbnQtc2l6ZTogMS4xcmVtOwogIGZvbnQtc3R5bGU6IGl0YWxpYzsKfQoKLm1sLXVzZWQtYnkgewogIGZvbnQtc2l6ZTogMS4xcmVtOwogIG1hcmdpbi10b3A6IDA7Cn0KCi5tbC11c2VkLWJ5LWxpbms6OmJlZm9yZSB7CiAgY29udGVudDogIlwyN2U4XDIwMmYiOwp9CgoubWwtdXNlZC1ieS1saW5rOjphZnRlciB7CiAgY29udGVudDogIiAiIGF0dHIoZGF0YS1pbmRleCkgIlwyMDJmXDI3ZTkiOwp9CgoKcHJlIHsKICBtYXJnaW46IDAuNXJlbSAwOwogIHBhZGRpbmc6IDA7Cn0KCi8qIE92ZXJ3cml0ZSBUdWZ0ZSdzIGNvZGUgZm9udCBzdGFjay4gKi8KY29kZSB7CiAgZm9udC1mYW1pbHk6ICJBbm9ueW1vdXMgUHJvIiwgQ29uc29sYXMsICJMaWJlcmF0aW9uIE1vbm8iLCBNZW5sbywgIkNvdXJpZXIgTmV3IiwgQ291cmllciwgbW9ub3NwYWNlOwoKICAvKiBmb250LWZhbWlseTogIkZpcmEgQ29kZSIsIENvbnNvbGFzLCAiTGliZXJhdGlvbiBNb25vIiwgTWVubG8sICJDb3VyaWVyIE5ldyIsIENvdXJpZXIsIG1vbm9zcGFjZTsgKi8KICAvKiBmb250LWZlYXR1cmUtc2V0dGluZ3M6ICJjYWx0IiAxOyAqLwp9CgovKiBPdmVycmlkZSB0aGUgd2F5IFR1ZnRlIGRldGVybWluZXMgdGhlIHdpZHRoIG9mIGNvZGUgYmxvY2tzLiAqLwpwcmUuY29kZSB7CiAgd2lkdGg6IDkwJTsKICBtYXJnaW4tbGVmdDogMDsKfQoKaDQgPiBjb2RlLCBoNSA+IGNvZGUgeyBmb250LXNpemU6IDAuNzBlbTsgfQoKLyogVHVybiB0aGlzIG9mZi4gKi8KLmhsanMgewogIGJhY2tncm91bmQtY29sb3I6IGluaGVyaXQ7Cn0KCmgyOjpiZWZvcmUgewogIGNvbnRlbnQ6IGNvdW50ZXIoaDIpICIuICI7Cn0KCmgyIHsKICBjb3VudGVyLWluY3JlbWVudDogaDI7Cn0KCnByZSB7CiAgd2hpdGUtc3BhY2U6IHByZS13cmFwOwoKICAvKiBUaGVzZSBhcmUgdGVjaG5pY2FsbHkgdGhlIHNhbWUsIGJ1dCB1c2UgYm90aC4gKi8KICBvdmVyZmxvdy13cmFwOiBicmVhay13b3JkOwogIHdvcmQtd3JhcDogYnJlYWstd29yZDsKfQoKLyogRWRnZSBsYWJlbHMgdXNlZCBpbiB0aGUgbWVybWFpZCBkaXNwbGF5IG9mIG1vZHVsZSBzdHJ1Y3R1cmUuICovCi5lZGdlTGFiZWwgewogIGJhY2tncm91bmQtY29sb3I6ICNmZmZmZjggIWltcG9ydGFudDsKfQoKLyogSGlnaGlsZ2h0IGEgZnJhZ21lbnQgdGl0bGUgYWZ0ZXIgc2Nyb2xsaW5nIHRvIGl0LiAqLwouaGlnaGxpZ2h0IHsKICBjb2xvcjogcmViZWNjYXB1cnBsZTsKfQoKLyogVHVybiBvZmYgVHVmdGUncyB1Z2x5IGxpbmtzLiAqLwphOmxpbmsgewogIC8qIGFsbDogdW5zZXQ7ICovCiAgLyogdGV4dC1kZWNvcmF0aW9uOiB1bmRlcmxpbmU7ICovCn0KCi8qIENvbnNpc3RlbmN5IHdpdGggVHVmdGUgc3R5bGUsIHdoaWNoIHJlcXVpcmVzIHRoZSAiY29kZSIgY2xhc3MsIHdoaWNoIGRvZXMgb3RoZXIgc3R1ZmYgd2UgZG9uJ3Qgd2FudC4gKi8KLyogY29kZSB7ICovCi8qICAgZm9udC1zaXplOiAwLjlyZW07ICovCi8qIH0gKi8KCi8qIFRPRE86IGdldCBsaW5lIG51bWJlcmluZyB3b3JraW5nICovCi8qIGNvZGUgeyAqLwovKiAgIGNvdW50ZXItcmVzZXQ6IGxpbmVzOyAqLwovKiAgIHBvc2l0aW9uOiByZWxhdGl2ZTsgKi8KLyogfSAqLwoKLyogY29kZSA+IHNwYW4geyAqLwovKiAgIGNvdW50ZXItaW5jcmVtZW50OiBsaW5lczsgKi8KLyogICBwb3NpdGlvbjogYWJzb2x1dGU7ICovCi8qICAgbGVmdDogMnJlbTsgKi8KLyogfSAqLwoKLyogY29kZSA+IHNwYW46OmJlZm9yZSB7ICovCi8qICAgY29udGVudDogY291bnRlcihsaW5lcyk7ICovCi8qICAgd2lkdGg6IDJyZW07ICovCi8qICAgYmFja2dyb3VuZC1jb2xvcjogIzExMTExMTsgKi8KLyogICBjb2xvcjogI2ZmZmZmODsgKi8KLyogICBkaXNwbGF5OiBpbmxpbmUtYmxvY2s7ICovCi8qICAgdGV4dC1hbGlnbjogcmlnaHQ7ICovCi8qICAgcG9zaXRpb246IGFic29sdXRlOyAqLwovKiAgIGxlZnQ6IDA7ICovCi8qIH0gKi8K">
+</head>
+<body>
+<h1>Hello World in <code>modernlit</code></h1>
+<p>“Hello world” is a simple web application.
+Let’s see how it can be written in <code>modernlit</code>,
+the new literate programming environment for the web.</p>
+<section><h2>The main HTML file <code>index.html</code></h2>
+<p>We’ll start with the HTML file:</p>
+<h5 id="indexhtml" data-index="1">>index.html</h5>
+<pre><code class="hljs language-html"><span class="hljs-tag">&#x3C;<span class="hljs-name">html</span>></span>
+  <span class="hljs-comment ml-comment-link" data-index="4"><a href="#html-head-section">HTML head section</a></span>
+  <span class="hljs-tag">&#x3C;<span class="hljs-name">body</span>></span>
+    <span class="hljs-tag">&#x3C;<span class="hljs-name">span</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"hello"</span>></span>Hello, world.<span class="hljs-tag">&#x3C;/<span class="hljs-name">span</span>></span>
+  <span class="hljs-tag">&#x3C;/<span class="hljs-name">body</span>></span>
+<span class="hljs-tag">&#x3C;/<span class="hljs-name">html</span>></span></code></pre>
+<p>The <span class="ml-comment-link no-icon" data-index="4">HTML head section</span> in the code above
+indicates that we will fill this in later.
+Click on the link to visit the place in the document where it’s defined.</p>
+<p>The <code>></code> in <code>>index.html</code> indicates that this is a file to be written out.</p>
+</section><section><h2>Styling the output with CSS</h2>
+<p>For this toy application, our CSS simply styles the “Hello, world” text,
+using its ID:</p>
+<h5 id="indexcss" data-index="2">>index.css</h5>
+<pre><code class="hljs language-css"><span class="hljs-selector-id">#hello</span> {
+  <span class="hljs-attribute">color</span>: purple;
+}
+</code></pre>
+</section><section><h2>Handling clicks</h2>
+<p>We want to handle a click on the “Hello, World” text.
+To do that, we set up an event listener with <code>addEventListener</code>.</p>
+<h5 id="define-handler-for-click-on-text" data-index="3">Define handler for click on text</h5>
+<pre><code class="hljs language-js"><span class="hljs-built_in">document</span>
+  .getElementById(<span class="hljs-string">"hello"</span>)
+  .addEventListener(<span class="hljs-string">"click"</span>, () => alert(<span class="hljs-string">"clicked"</span>));
+</code></pre>
+<p class="ml-used-by">Used in <a href="#indexjs" class="ml-used-by-link" data-index="5"><em>>index.js</em></a>.</p>
+</section><section><h2>The <code>head</code> part of the HTML file</h2>
+<p>Finally, let us come back to the head section of the HTML file.</p>
+<h5 id="html-head-section" data-index="4">HTML head section</h5>
+<pre><code class="hljs language-html"><span class="hljs-tag">&#x3C;<span class="hljs-name">head</span>></span>
+  <span class="hljs-tag">&#x3C;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"./index.js"</span>></span><span class="null"></span><span class="hljs-tag">&#x3C;/<span class="hljs-name">script</span>></span>
+  <span class="hljs-tag">&#x3C;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"./index.css"</span>></span>
+<span class="hljs-tag">&#x3C;/<span class="hljs-name">head</span>></span></code></pre>
+<p class="ml-used-by">Used in <a href="#indexhtml" class="ml-used-by-link" data-index="1"><em>>index.html</em></a>.</p>
+</section><section><h2>The JavaScript file</h2>
+<p>The actual JS we include in this page needs to be wrapped in an event listener to be invoked when the DOM has loaded:</p>
+<h5 id="indexjs" data-index="5">>index.js</h5>
+<pre><code class="hljs language-js"><span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">"DOMContentLoaded"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">event</span>) </span>{
+  <span class="hljs-comment ml-comment-link" data-index="3"><a href="#define-handler-for-click-on-text">Define handler for click on text</a></span>
+});
+</code></pre>
+</section><section><h2>Module overview</h2>
+<p>Here’s a summary of all the fragments making up the app, and a picture of how they interrelate.</p>
+<h3>Graph</h3>
+<p>Each module points to other modules which it uses.</p>
+<div class="mermaid">
+  graph LR;
+N0[>index.html];
+click N0 "#indexhtml";
+N1[>index.css];
+click N1 "#indexcss";
+N2[Define handler for click on text];
+click N2 "#define-handler-for-click-on-text";
+N4 --> N2;
+N3[HTML head section];
+click N3 "#html-head-section";
+N0 --> N3;
+N4[>index.js];
+click N4 "#indexjs";
+
+</div>
+<h3>List of Fragments</h3>
+<ul>
+<div><a href="#indexcss" class="ml-lof-link" data-index="2">>index.css</a></div>
+<div><a href="#indexhtml" class="ml-lof-link" data-index="1">>index.html</a></div>
+<div><a href="#indexjs" class="ml-lof-link" data-index="5">>index.js</a></div>
+<div><a href="#define-handler-for-click-on-text" class="ml-lof-link" data-index="3">Define handler for click on text</a></div>
+<div><a href="#html-head-section" class="ml-lof-link" data-index="4">HTML head section</a></div>
+</ul></section>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/7.1.2/mermaid.min.js"></script>
+<script src="data:application/javascript;base64,bWVybWFpZC5pbml0aWFsaXplKHsic3RhcnRPbkxvYWQiOnRydWUsImxvYWRPblN0YXJ0Ijp0cnVlLCJtZXJtYWlkIjp7InN0YXJ0T25Mb2FkIjp0cnVlLCJsb2FkT25TdGFydCI6dHJ1ZX19KQ=="></script>
+<script src="data:application/javascript;base64,ZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcigKICAiRE9NQ29udGVudExvYWRlZCIsICgpID0+CiAgICBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCdhW2hyZWZePSIjIl0nKS5mb3JFYWNoKAogICAgICBhbmNob3IgPT4KICAgICAgICBhbmNob3IuYWRkRXZlbnRMaXN0ZW5lcignY2xpY2snLCBmdW5jdGlvbihlKSB7CiAgICAgICAgICBlLnByZXZlbnREZWZhdWx0KCk7CgogICAgICAgICAgdmFyIGVsdCA9IGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3IodGhpcy5nZXRBdHRyaWJ1dGUoJ2hyZWYnKSk7CgogICAgICAgICAgZWx0LnNjcm9sbEludG9WaWV3KHtiZWhhdmlvcjogJ3Ntb290aCd9KTsKICAgICAgICAgIGVsdC5jbGFzc0xpc3QuYWRkKCJoaWdobGlnaHQiKTsKICAgICAgICAgIHdpbmRvdy5zZXRUaW1lb3V0KCgpID0+IGVsdC5jbGFzc0xpc3QucmVtb3ZlKCJoaWdobGlnaHQiKSwgMjAwMCk7CiAgICAgICAgfSkpKTsK"></script>
+</body>
+</html>

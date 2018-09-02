@@ -1,0 +1,181 @@
+/* TUFTE THEME */
+
+body {
+  counter-reset: h2 code;
+}
+
+/* FORMAT h% NODES (CODE BLOCK TITLES) */
+
+/**
+ * 202f is NARROW NO-BREAK SPACE.
+ * 27e8 is MATHEMATICAL LEFT ANGLE BRACKET.
+ * 27e9 is MATHEMATICAL RIGHT ANGLE BRACKET.
+ * 2263 is STRICTLY EQUIVALENT TO.
+ */
+
+h5::after {
+  content: " " attr(data-index) "\202f\27e9\2009\2263";
+  font-style: normal;
+}
+
+h5[data-increment]:after {
+  content: " " attr(data-index) "\202f\27e9\2009+\2263";
+}
+
+h5:before {
+  content: "\27e8\202f";
+  font-style: normal;
+}
+
+h5 {
+  margin-bottom: 6px;
+  font-style: italic;
+  font-size: 1.4rem;
+  counter-increment: code;
+  font-weight: normal;
+  transition: 1s all ease-in 1s;
+}
+
+h5.increment {
+  counter-increment: none;
+}
+
+/* style the links within code blocks. THe .ml-comment-link class is placed there by the `rehype-code-comment` middleware. */
+.ml-comment-link::after {
+  content: " " attr(data-index) "\202f\27e9\2009\1F517";
+`  font-style: normal;
+}
+
+.ml-comment-link.no-icon::after {
+  content: " " attr(data-index) "\202f\27e9";
+`  font-style: normal;
+}
+
+.ml-comment-link:before {
+  content: "\27e8\202f";
+  font-style: normal;
+}
+
+.ml-lof-link {
+  font-style: italic;
+  font-size: 1.2rem;
+}
+
+.ml-lof-link::before {
+  content: "\27e8\202f";
+  font-style: normal;
+}
+
+.ml-lof-link::after {
+  content: " " attr(data-index) "\202f\27e9";
+  font-style: normal;
+}
+
+.ml-comment-link {
+  color: #111111;
+  counter-increment: code;
+  cursor: pointer;
+  font-family: 'Times New Roman';
+  font-size: 1.1rem;
+  font-style: italic;
+}
+
+.ml-used-by {
+  font-size: 1.1rem;
+  margin-top: 0;
+}
+
+.ml-used-by-link::before {
+  content: "\27e8\202f";
+}
+
+.ml-used-by-link::after {
+  content: " " attr(data-index) "\202f\27e9";
+}
+
+
+pre {
+  margin: 0.5rem 0;
+  padding: 0;
+}
+
+/* Overwrite Tufte's code font stack. */
+code {
+  font-family: "Anonymous Pro", Consolas, "Liberation Mono", Menlo, "Courier New", Courier, monospace;
+
+  /* font-family: "Fira Code", Consolas, "Liberation Mono", Menlo, "Courier New", Courier, monospace; */
+  /* font-feature-settings: "calt" 1; */
+}
+
+/* Override the way Tufte determines the width of code blocks. */
+pre.code {
+  width: 90%;
+  margin-left: 0;
+}
+
+h4 > code, h5 > code { font-size: 0.70em; }
+
+/* Turn this off. */
+.hljs {
+  background-color: inherit;
+}
+
+h2::before {
+  content: counter(h2) ". ";
+}
+
+h2 {
+  counter-increment: h2;
+}
+
+pre {
+  white-space: pre-wrap;
+
+  /* These are technically the same, but use both. */
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+/* Edge labels used in the mermaid display of module structure. */
+.edgeLabel {
+  background-color: #fffff8 !important;
+}
+
+/* Highilght a fragment title after scrolling to it. */
+.highlight {
+  color: rebeccapurple;
+}
+
+/* Turn off Tufte's ugly links. */
+a:link {
+  /* all: unset; */
+  /* text-decoration: underline; */
+}
+
+/* Consistency with Tufte style, which requires the "code" class, which does other stuff we don't want. */
+/* code { */
+/*   font-size: 0.9rem; */
+/* } */
+
+/* TODO: get line numbering working */
+/* code { */
+/*   counter-reset: lines; */
+/*   position: relative; */
+/* } */
+
+/* code > span { */
+/*   counter-increment: lines; */
+/*   position: absolute; */
+/*   left: 2rem; */
+/* } */
+
+/* code > span::before { */
+/*   content: counter(lines); */
+/*   width: 2rem; */
+/*   background-color: #111111; */
+/*   color: #fffff8; */
+/*   display: inline-block; */
+/*   text-align: right; */
+/*   position: absolute; */
+/*   left: 0; */
+/* } */
