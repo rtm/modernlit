@@ -59,7 +59,7 @@ The generated HTML has many useful interactive features, such as jumping to a ma
 and folding code blocks.
 provid## Syntax
 
-### Introduction and background
+### Authoring
 
 `modernlit` hews closely to the notions and syntax of literate programming as suggested by Knuth,
 and found in his WEB and CWEB implementations,
@@ -102,6 +102,14 @@ we embed such macro references in the comment syntax of the underlying language,
     // <<Initialize queue>>
 
 As in Knuth's original implementation, fragments can be augmented by simply writing another code block with the same macro name.
+
+### Specialized features
+
+We have introduced a small new feature in the Markdown used by `modernlit`: "shortcodes" in double square brakcets.
+The two shortcodes current available are
+
+* `[[GRAPH]]`, which inserts a graph of the program structure
+* `[[LOF]]`, which inserts a sorted, navigatable list of named porgram parts (the "F" meaning "fragment")
 
 ## CLI
 

@@ -1,15 +1,195 @@
+# The `modernlit` literate programming system
+
+## Introduction
+
+`modernlit` is a literate programming system.
+This document is the modernlit system itself, written in modernlit.
+
+Literate programming is an approach to programming which strives to
+harmonize the human and machine aspects of programming into an integral whole
+which best expresses and communicates a software solution.
+Narrative descriptions and computer code are combined in a file like this one.
+Then, the code is extracted and reorganized in a process called "tangling",
+and the documention is created (in HTML) in a process called "weaving".
+
+modernlit holds true to the concepts underlying literate programming,
+but has been updated for the tools and techniques we use in 2018.
+We've chosen to use the simple, expressive Markdown format.
+
+## High-level structure
+
+This is a single file which contains the entire source code for modernlit.
+The basic structure is:
+
+##### >index.ts
+```ts
+// <<Prolog>>
+// <<Utilities>>
+// <<Weaving and tangling>>
+// <<Command line>>
+// <<Sourcemap mapping>>
+// <<Exports>>
+```
+
+In the above, each line is clickable, allowing you to jump to the code in question.
+The `>index.ts` notation indicates that this file will be written out into a file by that name.
+
+One of the tenets of literate programming is that code is presented in a way, and an order,
+which is amenable to human consumption.
+Thus, there is no neeed for us to discuss the program in the order given above.
+In this case, we will jump right into weaving and tangling.
+
+### Exports
+
+We export the routines necessary for the CLI commands,
+as well as `handleFile` and `Config` in case someone wants to use this programatically.
+
+##### Exports
+```ts
+export {modernlit, mlsourcemap, handleFile, Config};
+```
+
+## Weaving and tangling
+
+A key aspect of how the program works,
+and how it does weaving and tangling,
+is that it uses a system called [`unified`](https://unifiedjs.github.io/),
+which according to its website is "an interface for processing text with syntax trees and transforming between them."
+Specifically, `unified` has great support for Markdown and HTML,
+which is perfect for our use case. For example, we can define a series of processing steps as follows:
+
+##### Set up the processor
+```ts
+let processor = unified()
+  .use(parse)
+  .use(yaml)
+  .use(findFragments);
+```
+
+Here, the call to `unified` sets up a new "processor",
+which we then configure with calls to `use`,
+each specifying one step in the processing pipeline.
+In this case, we are telling it to:
+
+* parse the Markdown document
+* then handle the yaml frontmatter which can be used to specify settings
+* and finally do a preliminary pass of the file to find the "fragments" of code.
+
+We need to import unified, of course:
+
+##### Import unified core packages
+```ts
+import unified from "unified";
+```
+
+Note that we will be adding additional imports to the above.
+(One of the features of modernlit is that you can add to a fragment by simnply re-using its name.)
+
+We then further configure the processor depending on whether we are weaving or tangling or both,
+then execute it,
+
+##### Configure and execute the pipeline
+```ts
+const weaving = !config.only || config.only === "weave";
+const tangling = !config.only || config.only === "tangle";
+
+if (tangling) processor = processor.use(await tangle());
+if (weaving) processor = processor.use(await weave());
+
+const result = await processor.process(file);
+if (weaving) await writeHtml(result);
+```
+
+The entire process of handling a single file is embodied in the `handleFile` routine, which looks like this:
+
+##### Handle file
+```ts
+async function handleFile(file: VFile, initialConfig: Config) {
+  let config = deepmerge(initialConfig, {});
+
+  // <<Set up the processor>>
+
+  const weaving = !config.only || config.only === "weave";
+  const tangling = !config.only || config.only === "tangle";
+
+  // <<Configure and execute the pipeline>>
+
+  // <<Write HTML file>>
+  // <<Define weaving pipeline>>
+  // <<Define tangling pipeline>>
+}
+```
+
+In `unified`, we can define composite pipeline steps: steps which are themselves groups of steps.
+That is how we define the steps involved in weaving:
+
+##### Define weaving pipeline
+```ts
+  async function weave() {
+    return [
+      makePrettier,
+      beautifyHtml,
+      highlight,
+      [textr, {plugins: [typographicBase, typographicGuillemets]}],
+      shortcodes,
+      codeComments,
+      insertUsedBy,
+      handleShortcodes,
+      [mermaid, {simple: true}],
+      [remarkRehype, {allowDangerousHTML: true}],
+      themePlugins[config.theme],
+      rehypeStringify,
+      raw,
+      // <<Wrap HTML in document>>
+    ];
+  }
+```
+
+Each of the functions mentioned above follows the unfied protocol for "plugins",
+which is the mechanism by which processing pipeline steps are defined.
+Tuples (`[plugin, options]`) and thje way to specifiy plugins along with their options.
+
+The plugins involved in weaving do the following:
+
+| Plugin name | Description |
+| :----------- | :----------- |
+`makePrettier` | Apply `prettier` to format JS and CSS
+`beautifyHtml` | Format HTML
+`highlight` | Apply syntax highlighting to code
+`textr` | Apply typogrcaphical transformations
+`shortcodes` | Interpret shortcodes such as `[[GRAPH]]`
+`codeComments` | Detect transclusions in comments and process
+`insertUsedBy` | Insert "Used by" notations below each code fragment
+`handleShortCodes` | Interpret `[[GRAPH]]` and other shortcodes
+`mermaid` | Preprocess mermaid graphs
+`remarkRehype` | Transorm into HTML
+`themePlugins` | Apply plugins specific to current theme
+`rehypeStringify` | Convert HTML into string
+`raw` | Handle raw HTML in Markdown input
+
+The tangling pipeline is much simpler, with only a single process step,
+to write out the tangled files, such as `index.ts`.
+
+##### Define tangling pipeline
+```ts
+function tangle() {
+  return [writeSourceFiles];
+}
+
+```
+
+```ts
 import * as path from "path";
 import * as fs from "fs";
 import DataUri from "datauri";
 import deepmerge from "deepmerge";
 import jsYaml from "js-yaml";
 import rc from "rc";
+import minimist from "minimist";
 import chokidar from "chokidar";
 import * as sourcemap from "source-map";
 import mkdirp from "mkdirp";
-
 import glob from "glob";
-
 import * as prettier from "prettier";
 import jsBeautify from "js-beautify";
 
@@ -54,68 +234,6 @@ const globP = promisify(glob);
 const writeFile = promisify(fs.writeFile);
 const mkdirpP = promisify(mkdirp);
 
-// NEWLINES
-const platformNewline = require("os").EOL as string;
-
-export type Newline = "crlf" | "lf" | "auto";
-
-const newlines = {
-  crlf: "\r\n",
-  lf: "\n",
-  auto: platformNewline,
-};
-
-export const eol = (newline: Newline) => newlines[newline];
-
-export const newlineRe = /\r\n?|\n/;
-
-export interface MermaidConfig {
-  theme: "default" | "forest" | "dark" | "neutral";
-  backgroundColor: string;
-}
-
-// In modernlit, transclusions are embedded in native commetns.
-// We want to detect if a particular line--in any language (!)--is a transclusion.
-// It has to be a comment, containing `<<>>`, with what's inside being captured.
-// By definition, this must all be on one line.
-//
-// Isn't there some better way to do this?
-function makeTransclusionChecker(lang: string) {
-  const styles = {
-    html: /<!--\s*<<(.*)>>.*-->/,
-    doubleSlash: /\s*\/\/.*<<(.*)>>/,
-    slashStar: /\/\*.*<<(.*)>>.*\*\//,
-    hash: /\s*#.*<<(.*)>>/,
-    haskell: /\{-.*<<(.*)>>.*-\}/,
-  };
-
-  const languages = {
-    c: ["doubleSlash", "slashStar"],
-    cpp: ["doubleSlash", "slashStar"],
-    css: ["slashStar"],
-    cs: ["doubleSlash", "slashStar"],
-    hs: ["haskell"],
-    html: ["html"],
-    java: ["doubleslash"],
-    js: ["doubleSlash", "slashStar"],
-    py: ["hash"],
-    sass: ["doubleSlash", "slashStar"],
-    scss: ["doubleSlash", "slashStar"],
-    sh: ["hash"],
-    ts: ["doubleSlash", "slashStar"],
-    xhtml: ["html"],
-  };
-
-  const styleList = languages[lang] || [];
-
-  return (line: string) => {
-    for (const style of styleList) {
-      const match = line.match(styles[style]);
-
-      if (match) return match;
-    }
-  };
-}
 
 export interface Config {
   help: boolean;
@@ -140,31 +258,9 @@ export interface Config {
   watch: boolean;
   wrapAttributes: "auto" | "force";
 }
+```
 
-// Utility to create slugs from fragment titles, which we will use as IDs.
-// `avoidDuplicates` is not implemented!
-function slugify(string: string, avoidDuplicates: string[] = [], maxLength = 32): string {
-  return (
-    string
-      .toLowerCase()
-
-      // Replace spaces with dashes.
-      .replace(/\s+/g, "-")
-
-      // Kill non-alphanumerics.
-      .replace(/[^\w-]+/g, "")
-
-      // Replace multiple hyphens.
-      .replace(/-{2,}/g, "-")
-
-      // Enforce length.
-      .slice(0, maxLength)
-
-      // Remove leading and trailing hyphens.
-      .replace(/^-|-$/g, "")
-  );
-}
-
+```
 // A remark plugin to allow custom block-level literate programming fragments
 //  of the form `<<fragment name>>=` (with an optional `+`).
 //
@@ -174,8 +270,8 @@ function slugify(string: string, avoidDuplicates: string[] = [], maxLength = 32)
 //  To apply transformations from the fragments to HTML or other
 //  formats, please see the example in the README.
 //
-//  <<frament-title>>=
-//  <<fragment-title>>+=
+//  < <fragment-title>>=
+//  < <fragment-title>>+=
 //
 //  {
 //  type: 'MlFragment',
@@ -240,8 +336,20 @@ function isRemarkParser(parser) {
 function isRemarkCompiler(compiler) {
   return Boolean(compiler && compiler.prototype);
 }
-// Converr our own "weave" config into a configuration for beautify-js.
-// Right now we are only handling indent and indent_inner_html.
+```
+
+### Beautification
+
+We beautify woven output using the wonderful `prettier` package for CSS, JS, and other languages,
+and jsBeautify for HTML. THe `unified` system offers a `rehype-format` module which is supposed to
+beautify HTML, but it doesn't work too well, hence our decision to use jsBeautify.
+
+We want to allow the user to pass options to `jsBeatify`,
+so we need to convert our options into theres.
+Right now we are only handling `indent` and `indent_inner_html`.
+
+##### Converter for jsBeautify options
+```ts
 function makeJsBeautifyOptions(config: Config) {
   const {
     indent: indent_size,
@@ -252,10 +360,14 @@ function makeJsBeautifyOptions(config: Config) {
 
   return {indent_size, indent_inner_html, wrap_line_length, wrap_attributes};
 }
+```
 
-// Convert our own "weave" config into a configuration for prettier.js.
+In exactly the same way, we need to convert prettier options.
+Currently we only convert the line length and indent options.
+
+##### Converter for prettier options
+```ts
 function mapPrettierOptions(config: Config): Partial<prettier.Options> {
-  // Create an object of prettier options based on whatever weave options are set.
   const result: prettier.Options = {};
 
   if ("lineLength" in config) {
@@ -268,7 +380,75 @@ function mapPrettierOptions(config: Config): Partial<prettier.Options> {
 
   return result;
 }
+```
 
+The actual application of prettier and jsBeautify is done by means of `unified` "plug-ins".
+Unified plugins are functions which return a function which operates on a "tree" (an abstract suntax tree, of AST),
+and/or a "file", which in this case is a "virtual file" known as a `VFile`.
+The most common pattern for a plug-in, as shown here, is to use `visit` to visit each node in term,
+and examine or mutate it.
+
+First, here is the plugin for prettier:
+
+##### Prettier plugin for unified
+
+```ts
+function makePrettier(this: any) {
+  const config: Config = this.data("settings");
+
+  return async (tree, file) => {
+    const prettierConfig = await prettier.resolveConfig(file.path);
+
+    visit(tree, "code", node => {
+      const {lang, value} = node;
+      const filepath = `foo.${lang}`;
+
+      if (lang === "html" || lang === "mermaid") return;
+
+      try {
+        // Combine prettier options from .prettierrc etc., and our options.
+        const options = {filepath, ...prettierConfig, ...config.prettier};
+
+        const result = prettier.format(value, options);
+
+        if (result) node.value = result;
+        else
+          file.message(
+            `Formatting failed for ${lang}`,
+            node.position.start,
+            "format-code-block:weave"
+          );
+      } catch (e) {
+        file.message(
+          `No parser available for ${lang}`,
+          node.position.start,
+          "format-code-block:weave"
+        );
+        console.error("Prettier error was", e);
+      }
+    });
+  };
+}
+```
+
+Here is the plugin for jsBeautify, which we apply only to HTML:
+
+##### jsBeautify plugin for unified
+`
+```ts
+function beautifyHtml() {
+  return tree =>
+    visit(
+      tree,
+      "code",
+      node =>
+        node.langCode === "html" &&
+        (node.value = jsBeautify.html(node.value, makeJsBeautifyOptions(tree.data.config)))
+    );
+}
+```
+
+```ts
 async function getThemeCss(theme: string) {
   const themePath = path.join(__filename, "..", "themes", `${theme}.css`);
   const themeCss = await DataUri.promise(themePath);
@@ -561,53 +741,6 @@ function handleShortcodes() {
   };
 }
 
-function makePrettier(this: any) {
-  const config: Config = this.data("settings");
-
-  return async (tree, file) => {
-    const prettierConfig = await prettier.resolveConfig(file.path);
-
-    visit(tree, "code", node => {
-      const {lang, value} = node;
-      const filepath = `foo.${lang}`;
-
-      if (lang === "html" || lang === "mermaid") return;
-
-      try {
-        // Combine prettier options from .prettierrc etc., and our options.
-        const options = {filepath, ...prettierConfig, ...config.prettier};
-
-        const result = prettier.format(value, options);
-
-        if (result) node.value = result;
-        else
-          file.message(
-            `Formatting failed for ${lang}`,
-            node.position.start,
-            "format-code-block:weave"
-          );
-      } catch (e) {
-        file.message(
-          `No parser available for ${lang}`,
-          node.position.start,
-          "format-code-block:weave"
-        );
-        console.error("Prettier error was", e);
-      }
-    });
-  };
-}
-
-function beautifyHtml() {
-  return tree =>
-    visit(
-      tree,
-      "code",
-      node =>
-        node.langCode === "html" &&
-        (node.value = jsBeautify.html(node.value, makeJsBeautifyOptions(tree.dadta.config)))
-    );
-}
 
 // Each theme can be associated with a set of plugins.
 // Currently, we only have the Tufte theme.
@@ -712,6 +845,11 @@ async function handleFile(file: VFile, initialConfig: Config) {
       ],
     ];
   }
+
+  function tangle() {
+    return [writeSourceFiles];
+   }
+
 }
 
 // YAML
@@ -734,10 +872,6 @@ function parseYaml(this: {data: (key: string, value?: any) => any}) {
       // Unified compalines that data cannot be called on a "frozen" processor.
     }
   };
-}
-
-function tangle() {
-  return [writeSourceFiles];
 }
 
 // Write out tangled files, and sourcemaps.
@@ -830,10 +964,13 @@ function writeSourceFiles(this: any) {
     }
   };
 }
+```
 
-////////////////////////////////////////////////////////////////
-// COMMAND LINE VERSIONS
+## Command line versions
 
+We make weaving and tangling available from the command line.
+
+```ts
 // Linting. This is available by means of the `--lint` option.
 const lintPlugins = [
   //  This doesn't work properly, probably because of the two dots.
@@ -845,9 +982,27 @@ const lintPlugins = [
   [require("remark-lint-fenced-code-flag"), {allowEmpty: false}],
   [require("remark-lint-fenced-code-marker"), "`"],
 ];
+```
 
-// Weaving from command line.
+The high-level structure of this function is, which is exported and exposed as the `modernlit` executable, is:
+
+##### Command line
+```ts
 async function modernlit() {
+  // <<Handle configuration>>
+  // <<Find files>>
+  // <<Process files>>
+  // <<Set up watching>>
+
+  // <<<Handle one file>>
+  // <<Display help>>
+}
+```
+
+For configuration we use the `rc` package.
+
+##### Handle configuration
+```ts
   // Default.
   const config = {
     indentInnerHtml: true,
@@ -858,26 +1013,41 @@ async function modernlit() {
     wrapAttributes: "auto",
   } as Config;
 
-  //  rc("modernlit", config, options);
-  rc("modernlit", config);
+  const minimistConfig = {boolean: true};
+  const options = minimist(process.argv.slice(2), minimistConfig) as any;
+  const files = options._;
+
+  rc("modernlit", config, options);
   const configs = config["configs"];
-  const files = config["_"];
 
   const {help, recurse, quiet, lint, watch, verbose} = config;
 
   if (help) usage(), process.exit(1);
   if (!files || !files.length) console.log("No files specified."), process.exit(1);
   if (verbose && configs) console.log("Using config files", configs.join(", "));
+```
 
+We use another library to find all the files to be processed
+(in case the user has used the `--recurse` option).
+
+##### Find files
+```ts
   const globPatterns = files.map(file => `${file}/**/*.lit.md`);
   const globbedFiles = recurse ? await globP(globPatterns.join(" ")) : files;
+```
 
-  // Handle the specified files or directories right now, and log results if not quiet.
+We handle the specified files or directories immediately, and log results if not quiet.
+##### Process files
+```ts
   const vfiles: VFile[] = [];
   for (const file of globbedFiles) vfiles.push(await handle(file));
   if (!quiet) console.error(reporter(vfiles));
+```
 
-  // Watch for changes if that was requested.
+If watching was requested, we set that up.
+
+##### Set up watching
+```ts
   if (watch)
     chokidar
       .watch(recurse ? globPatterns : files, {ignoreInitial: true})
@@ -887,9 +1057,19 @@ async function modernlit() {
           if (!quiet) console.error(reporter(vfile));
         }
       });
+```
 
-  // Handle s single file, either initially or when watch triggers.
-  async function handle(path: string): Promise<VFile> {
+For watching, we use the library called `chokidar`.
+##### Import libraries
+```ts
+import * as chokidar from chokidar"
+```
+
+The following logic for processing a single file is applied both initially and when watching.
+
+##### Handle one file
+```ts
+async function handle(path: string): Promise<VFile> {
     const vfile = toVfile.readSync({path});
 
     if (lint)
@@ -901,7 +1081,10 @@ async function modernlit() {
 
     return vfile;
   }
+```
 
+##### Display help
+```ts
   function usage() {
     console.log("Usage:");
     console.log();
@@ -910,7 +1093,7 @@ async function modernlit() {
     console.log("Options");
     console.log("  --help              Display this message");
     console.log("  --indent=           Width of indentation");
-    console.log("  --lineLength=       Maximum line length");
+    console.log("  --lineLength=       Maximum line lnegth");
     console.log("  --lint              Check input files");
     console.log("  --mermaid.theme=    Theme for mermaid diagrams");
     console.log("  --outDir=           Location of output files");
@@ -930,43 +1113,229 @@ async function modernlit() {
     console.log("  --verbose           Print additional information");
     console.log("  --wrapAttributes    Wrap HTML attributes (auto, force, etc.)");
   }
-}
+```
 
-////////////////////////////////////////////////////////////////
-// SOURCE MAPS
+## Sourcemap handling
+This routine rewrites a sourcemap such as generated by `tsc` (the TypeScript compiler)
+to reflect the mapping from the modernlit input to TypeScript.
+That is the most common case, but actually this script doesn't care.
+For example, it could be applied to a sourcemap created by SCSS.
+The function takes the "input" sourcemap on stdin, and outputs the remapped sourcemap on stdout.
+This routine is used by the `mlsourcemap` command installed into `node_mobules/.bin`
+by the `bin` property in `package.json`.
 
-// Rewrite a sourcemap as generated by tsc to reflect the mapping from the modernlit input to TypeScript.
-// That is the most common case, but actually this script doesn't care.
-// For example, it could by applied to a sourcemap created by SCSS.
-// Takes the "input" sourcemap on stdin, and outputs the remapped sourcemap on stdout.
-// This routine is used by the `mlsourcemap` command installed into `node_mobulds/.bin`.
-//
-// Usage:
-// ```
-// cat foo.js.map | mlsourcem foo.ts.map > foo.js.map
-// cat foo.css.map | mlsourcem foo.scss.map > foo.css.map
-// ```
+Usage:
 
+    cat foo.js.map | mlsourcem foo.ts.map > foo.js.map
+    cat foo.css.map | mlsourcem foo.scss.map > foo.css.map
+
+The basic logic is:
+
+##### Sourcemap mapping
+```ts
 async function mlsourcemap() {
-  // Get the input sourcemap (e.g., foo.js.map) from stdin.
+  // <<Get the input sourcemap from stdin>>
+  // <<Get the modernlit sourcemap from the first argument>>
+  // <<Create consumers for both sourcemaps>>
+  // <<Create a generator and apply the sourcemap>>
+}
+```
+
+We read in the input sourcemap, such as `foo.js.map`, and parse it.
+##### Get the input sourcemap from stdin
+```ts
   const inputSourcemapJson = fs.readFileSync("/dev/stdin", "utf-8");
   const inputSourcemap = JSON.parse(inputSourcemapJson);
+```
 
-  // The the modernlit sourcemap (e.g. foo.ts.map) from the first argument.
+The file name of the source map (for example, foo.ts.map)
+to be applied to the input is provided on the command line.
+
+##### Get the modernlit sourcemap from the first argument
+```ts
   const [, , mlSourcemapName] = process.argv;
   const mlSourcemapJson = fs.readFileSync(mlSourcemapName, "utf-8");
   const mlSourcemap = JSON.parse(mlSourcemapJson);
+```
 
-  // Create consumers for both sourcemaps.
+We now create "consumer" objects for these two sourcemaps:
+
+##### Create consumers for both sourcemaps
+```ts
   const inputConsumer = await new sourcemap.SourceMapConsumer(inputSourcemap);
   const mlConsumer = await new sourcemap.SourceMapConsumer(mlSourcemap);
+```
 
-  // Create a "generator" based on the input sourcemap consumer.
+Finally, we create a "generator" for the first consumer, and apply the second.
+
+##### Create a generator and apply the sourcemap
+```ts
   const generator = sourcemap.SourceMapGenerator.fromSourceMap(inputConsumer);
 
-  // "Apply" the modernlit sourcemap, and output it.
   generator.applySourceMap(mlConsumer);
-  console.log(generator.toString());
-}
+```
 
-export {modernlit, handleFile, mlsourcemap};
+`sourcemap` in the above is a reference to the Mozilla [source-map library](https://github.com/mozilla/source-map).
+
+##### Import libraries
+```ts
+import * as sourcemap from "source-map";
+```
+
+## Bookkeeping
+
+Lest we forget, we need to import everything.
+
+##### Prolog
+
+```ts
+// <<Imports>>
+```
+
+We need to import the remaining unified-related packages, both for `remark` (the Markdown processor),
+and `rehype` (the HTML processor).
+
+##### Import unified packages
+```ts
+// <<Import remark packages>>
+// <<Import rehype packages>>
+```
+
+The entire set of imports looks like this.
+
+##### Imports
+```ts
+// <<Import libraries>>
+// <<Import unified packages>
+```
+
+[[GRAPH]]
+
+## Utilities
+
+Finally, let us present some utilities that we will be using.
+
+##### Utilities
+```ts
+// <<Newline utilities>>
+// <<Transclusion utilities>>
+// <<Slugification utilities>>
+```
+
+### Newlines
+
+`modernlit` tries to be smart about newlines, especially in tangled output.
+We provide options to control this.
+We also define a regular expression used to break a text block into lines.
+
+##### Newline utilities
+```ts
+const platformNewline = require("os").EOL as string;
+
+export type Newline = "crlf" | "lf" | "auto";
+
+const newlines = {
+  crlf: "\r\n",
+  lf: "\n",
+  auto: platformNewline,
+};
+
+export const eol = (newline: Newline) => newlines[newline];
+
+export const newlineRe = /\r\n?|\n/;
+```
+
+```ts
+export interface MermaidConfig {
+  theme: "default" | "forest" | "dark" | "neutral";
+  backgroundColor: string;
+}
+```
+
+### Transclusion utilities
+
+In `modernlit`, transclusions--references to other code fragments--are embedded in native comments.
+We want to detect if a particular line--in any language (!)--is a transclusion.
+It has to be a comment, containing `<<>>`, with what's inside being captured.
+By definition, this must all be on one line.
+
+Once you know the language, call `makeTransclusionChecker` to make a transclusion checker for that language.
+Then, call that checker on each line to see if it's a transclusion.
+
+When weaving, we apply highlighting, as a side-effect of which comments are identified
+and marked with the `hljs-comment` class, which allows us to style them,
+but this does not help us trying to identify transclusions for tangling purposes.
+Hence the need for this utility.
+
+##### Transclusion utilities
+```ts
+function makeTransclusionChecker(lang: string) {
+  const styles = {
+    html: /<!--\s*<<(.*)>>.*-->/,
+    doubleSlash: /\s*\/\/.*<<(.*)>>/,
+    slashStar: /\/\*.*<<(.*)>>.*\*\//,
+    hash: /\s*#.*<<(.*)>>/,
+    haskell: /\{-.*<<(.*)>>.*-\}/,
+  };
+
+  const languages = {
+    c: ["doubleSlash", "slashStar"],
+    cpp: ["doubleSlash", "slashStar"],
+    css: ["slashStar"],
+    cs: ["doubleSlash", "slashStar"],
+    hs: ["haskell"],
+    html: ["html"],
+    java: ["doubleslash"],
+    js: ["doubleSlash", "slashStar"],
+    py: ["hash"],
+    sass: ["doubleSlash", "slashStar"],
+    scss: ["doubleSlash", "slashStar"],
+    sh: ["hash"],
+    ts: ["doubleSlash", "slashStar"],
+    xhtml: ["html"],
+  };
+
+  const styleList = languages[lang] || [];
+
+  return (line: string) => {
+    for (const style of styleList) {
+      const match = line.match(styles[style]);
+
+      if (match) return match;
+    }
+  };
+
+
+}
+```
+
+### Slugifying
+
+In order to support huperlinks addressing fragment names,
+both from inside code fragments and inside text,
+we assign each code framgnet's heading a valid ID,
+based on its textual content.
+
+##### Slugification utilities
+```ts
+function slugify(string: string, avoidDuplicates: string[] = [], maxLength = 32): string {
+  return (
+    string
+      .toLowerCase()
+
+      // Replace spaces with dashes.
+      .replace(/\s+/g, "-")
+
+      // Kill non-alphanumerics.
+      .replace(/[^\w-]+/g, "")
+
+      // Replace multiple hyphens.
+      .replace(/-{2,}/g, "-")
+
+      // Enforce length.
+      .slice(0, maxLength)
+
+      // Remove leading and trailing hyphens.
+      .replace(/^-|-$/g, "")
+  );
+}

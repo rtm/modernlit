@@ -24,7 +24,6 @@ const datauri_1 = __importDefault(require("datauri"));
 const deepmerge_1 = __importDefault(require("deepmerge"));
 const js_yaml_1 = __importDefault(require("js-yaml"));
 const rc_1 = __importDefault(require("rc"));
-const minimist_1 = __importDefault(require("minimist"));
 const chokidar_1 = __importDefault(require("chokidar"));
 const sourcemap = __importStar(require("source-map"));
 const mkdirp_1 = __importDefault(require("mkdirp"));
@@ -681,11 +680,10 @@ function modernlit() {
             title: "modernlit",
             wrapAttributes: "auto",
         };
-        const minimistConfig = { boolean: true };
-        const options = minimist_1.default(process.argv.slice(2), minimistConfig);
-        const files = options._;
-        rc_1.default("modernlit", config, options);
+        //  rc("modernlit", config, options);
+        rc_1.default("modernlit", config);
         const configs = config["configs"];
+        const files = config["_"];
         const { help, recurse, quiet, lint, watch, verbose } = config;
         if (help)
             usage(), process.exit(1);
@@ -732,7 +730,7 @@ function modernlit() {
             console.log("Options");
             console.log("  --help              Display this message");
             console.log("  --indent=           Width of indentation");
-            console.log("  --lineLength=       Maximum line lnegth");
+            console.log("  --lineLength=       Maximum line length");
             console.log("  --lint              Check input files");
             console.log("  --mermaid.theme=    Theme for mermaid diagrams");
             console.log("  --outDir=           Location of output files");

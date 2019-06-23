@@ -28,11 +28,13 @@ h5:before {
 }
 
 h5 {
-  margin-bottom: 6px;
-  font-style: italic;
-  font-size: 1.4rem;
   counter-increment: code;
+  font-size: 1.4rem;
+  font-style: italic;
+
   font-weight: normal;
+  margin-bottom: 6px;
+  margin-top: 1.2rem;
   transition: 1s all ease-in 1s;
 }
 
@@ -71,7 +73,8 @@ h5.increment {
   font-style: normal;
 }
 
-.ml-comment-link {
+.hljs-comment {
+/*.ml-comment-link {*/
   color: #111111;
   counter-increment: code;
   cursor: pointer;
@@ -93,7 +96,6 @@ h5.increment {
   content: " " attr(data-index) "\202f\27e9";
 }
 
-
 pre {
   margin: 0.5rem 0;
   padding: 0;
@@ -105,6 +107,7 @@ code {
 
   /* font-family: "Fira Code", Consolas, "Liberation Mono", Menlo, "Courier New", Courier, monospace; */
   /* font-feature-settings: "calt" 1; */
+  /* Also consider Pragmata, Iosevka, Envy Code R, Inconsolata (micro-serifs), Hasklig (Haskell-focused), Andale Mono, Profont, Deja Vu Sans Hermit, Mono, Courier Prime, and Monofur. */
 }
 
 /* Override the way Tufte determines the width of code blocks. */
@@ -126,6 +129,15 @@ h2::before {
 
 h2 {
   counter-increment: h2;
+  counter-reset: h3;
+}
+
+h3: before {
+  content: counter(h2) "." counter(h3) ". ";
+}
+
+h3 {
+  counter-increment: h3;
 }
 
 pre {
@@ -144,6 +156,20 @@ pre {
 /* Highilght a fragment title after scrolling to it. */
 .highlight {
   color: rebeccapurple;
+}
+
+/* Format tables. */
+table {
+  border-collapse: collapse;
+}
+
+td, th {
+  border: 1px solid gray;
+  padding: 2px 6px;
+}
+
+th {
+  font-weight: bold;
 }
 
 /* Turn off Tufte's ugly links. */
