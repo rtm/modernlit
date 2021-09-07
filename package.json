@@ -49,7 +49,7 @@
     "remark-emoji": "^2.0.1",
     "remark-frontmatter": "^1.2.1",
     "remark-highlight.js": "^5.0.0",
-    "remark-html": "^8.0.0",
+    "remark-html": "^13.0.2",
     "remark-lint-code-block-style": "^1.0.2",
     "remark-lint-fenced-code-flag": "^1.0.2",
     "remark-lint-fenced-code-marker": "^1.0.2",
